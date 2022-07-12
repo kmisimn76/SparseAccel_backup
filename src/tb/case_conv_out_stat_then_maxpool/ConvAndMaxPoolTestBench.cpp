@@ -36,9 +36,9 @@ int main(int argc, char** argv)
 	}
 	char* kernel_file_name = argv[1];
 	char* layer_info_file_name = argv[2];
-	bool is_sw_emu = (strstr(kernel_file_name, "sw_emu") != NULL)?(true):(false);
-	bool is_hw_emu = (strstr(kernel_file_name, "hw_emu") != NULL)?(true):(false);
-	bool is_hw = (strstr(kernel_file_name, "hw") != NULL)?(true):(false);
+	bool is_sw_emu = (strstr(kernel_file_name, ".sw_emu.") != NULL)?(true):(false);
+	bool is_hw_emu = (strstr(kernel_file_name, ".hw_emu.") != NULL)?(true):(false);
+	bool is_hw = (strstr(kernel_file_name, ".hw.") != NULL)?(true):(false);
 
 	TestEnvironment test_env;
 	test_env.kernel_file_name = kernel_file_name;
@@ -103,7 +103,6 @@ long runTestLayerWithMeasure(TestEnvironment& test_env, ConvLayerInfo& conv_laye
 	MaxPoolTask maxpool_task;
 	bool random_input;
 	bool sparsifying;
-	cl::Event* evt;
 	cl_ulong total_latency = 0.0;
 	cl_ulong latency;
 
@@ -124,10 +123,9 @@ long runTestLayerWithMeasure(TestEnvironment& test_env, ConvLayerInfo& conv_laye
 	//run conv task
 	test_env.target_task = &conv_task;
 	test_env.initializeClBuffer();
-	test_env.enqueDataWithReorder();
 	test_env.setClArgs();
-	evt = test_env.runTaskWithWait();
-	latency = test_env.computeLatencyOfTask(evt);
+	test_env.enqueDataWithReorder();
+	latency = test_env.runTaskWithWait();
 	total_latency += latency;
 	printf("=>Conv Kernel time (ms): \t%lf\n", (double)latency/1000000.0);
 	test_env.readDataWithReorder();
@@ -135,10 +133,9 @@ long runTestLayerWithMeasure(TestEnvironment& test_env, ConvLayerInfo& conv_laye
 	//run maxpool task
 	test_env.target_task = &maxpool_task;
 	test_env.initializeClBuffer();
-	test_env.enqueDataWithReorder();
 	test_env.setClArgs();
-	evt = test_env.runTaskWithWait();
-	latency = test_env.computeLatencyOfTask(evt);
+	test_env.enqueDataWithReorder();
+	latency = test_env.runTaskWithWait();
 	total_latency += latency;
 	printf("=>Maxpool Kernel time (ms): \t%lf\n", (double)latency/1000000.0);
 	test_env.readDataWithReorder();

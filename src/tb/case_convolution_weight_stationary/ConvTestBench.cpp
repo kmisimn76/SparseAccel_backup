@@ -37,9 +37,9 @@ int main(int argc, char** argv)
 	}
 	char* kernel_file_name = argv[1];
 	char* layer_info_file_name = argv[2];
-	bool is_sw_emu = (strstr(kernel_file_name, "sw_emu") != NULL)?(true):(false);
-	bool is_hw_emu = (strstr(kernel_file_name, "hw_emu") != NULL)?(true):(false);
-	bool is_hw = (strstr(kernel_file_name, "hw") != NULL)?(true):(false);
+	bool is_sw_emu = (strstr(kernel_file_name, ".sw_emu.") != NULL)?(true):(false);
+	bool is_hw_emu = (strstr(kernel_file_name, ".hw_emu.") != NULL)?(true):(false);
+	bool is_hw = (strstr(kernel_file_name, ".hw.") != NULL)?(true):(false);
 
 	TestEnvironment test_env;
 	test_env.kernel_file_name = kernel_file_name;
@@ -114,13 +114,11 @@ long runTestLayerWithMeasure(TestEnvironment& test_env, ConvLayerInfo& layer_inf
 	test_env.target_task->computeGold();
 
 	test_env.initializeClBuffer();
-	test_env.enqueDataWithReorder();
 	test_env.setClArgs();
+	test_env.enqueDataWithReorder();
 
 	// run
-	cl::Event* evt = test_env.runTaskWithWait();
-
-	cl_ulong latency = test_env.computeLatencyOfTask(evt);
+	cl_ulong latency = test_env.runTaskWithWait();
 	printf("=>Kernel time (ms): \t%lf\n", (double)latency/1000000.0);
 
 	test_env.readDataWithReorder();
